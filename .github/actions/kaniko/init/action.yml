@@ -1,0 +1,27 @@
+name: 'Kaniko Init'
+description: 'Prepare environment for Kaniko build.'
+
+inputs:
+  workingDirectory:
+    description: 'Path to the working directory'
+    required: true
+  environment:
+    description: 'Name of the environment'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Docker config
+      run: |
+        mkdir -p $HOME/.docker
+        echo '{}' > $HOME/.docker/config.json
+      shell: bash
+    # Add cloud auth or secret setup here if needed
+    - name: Print working directory
+      run: |
+       echo "Working directory: $WORKING_DIRECTORY"
+      shell: bash
+      env:
+        WORKING_DIRECTORY: ${{ inputs.workingDirectory }}
+

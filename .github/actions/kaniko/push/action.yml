@@ -1,0 +1,29 @@
+name: 'Kaniko Push'
+description: 'Push Docker image to registry using Kaniko.'
+
+inputs:
+  workingDirectory:
+    description: 'Path to the working directory'
+    required: true
+  environment:
+    description: 'Name of the environment'
+    required: true
+  imageName:
+    description: 'Name of the Docker image to push'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Kaniko push
+      run: |
+        docker run --rm \
+          -v "${{ inputs.workingDirectory }}:/workspace" \
+          -v "$HOME/.docker:/kaniko/.docker" \
+          gcr.io/kaniko-project/executor:latest \
+          --dockerfile=/workspace/Dockerfile \
+          --context=dir:///workspace \
+          --destination=${{ inputs.imageName }} \
+          --push
+      shell: bash
+

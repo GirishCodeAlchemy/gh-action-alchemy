@@ -1,0 +1,55 @@
+name: Kaniko Action Workflow Test
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: "Name of the GH runner"
+        required: false
+        type: string
+        default: "nonprod-linux-x64-medium"
+      workingDirectory:
+        description: "Path to the working directory"
+        required: true
+        type: string
+      environment:
+        description: "Name of the environment"
+        required: true
+        type: string
+      imageName:
+        description: "Name of the Docker image to build and push"
+        required: true
+        type: string
+
+jobs:
+  kaniko-job:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Kaniko Init
+        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/init@main
+        with:
+          workingDirectory: ${{ inputs.workingDirectory }}
+          environment: ${{ inputs.environment }}
+
+      - name: Kaniko Lint Dockerfile
+        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/lint@main
+        with:
+          workingDirectory: ${{ inputs.workingDirectory }}
+          environment: ${{ inputs.environment }}
+
+      - name: Kaniko Build
+        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/build@main
+        with:
+          workingDirectory: ${{ inputs.workingDirectory }}
+          environment: ${{ inputs.environment }}
+          imageName: ${{ inputs.imageName }}
+
+      - name: Kaniko Push
+        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/push@main
+        with:
+          workingDirectory: ${{ inputs.workingDirectory }}
+          environment: ${{ inputs.environment }}
+          imageName: ${{ inputs.imageName }}

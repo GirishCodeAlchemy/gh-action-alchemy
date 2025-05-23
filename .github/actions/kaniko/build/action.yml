@@ -1,0 +1,26 @@
+name: 'Kaniko Build'
+description: 'Build Docker image using Kaniko.'
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Kaniko build
+      run: |
+        docker run --rm \
+          -v "${{ inputs.workingDirectory }}:/workspace" \
+          -v "$HOME/.docker:/kaniko/.docker" \
+          gcr.io/kaniko-project/executor:latest \
+          --dockerfile=/workspace/Dockerfile \
+          --context=dir:///workspace \
+          --destination=${{ inputs.imageName }} \
+          --no-push
+      shell: bash
+inputs:
+  workingDirectory:
+    description: 'Path to the working directory'
+    required: true
+  environment:
+    description: 'Name of the environment'
+    required: true
+  imageName:
+    description: 'Name of the Docker image to build'
+    required: true
