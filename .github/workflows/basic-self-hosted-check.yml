@@ -1,0 +1,27 @@
+name: Self Hosted Runner Check
+
+
+on:
+ workflow_dispatch:
+ push:
+  branches:
+  - main
+
+jobs:
+ self-hosted-runner:
+    runs-on: nonprod-linux-x64-medium
+    steps:
+     - name: Checkout Code
+       uses: actions/checkout@v4
+     - name: Print Runner Info
+       run: |
+           echo "Runner OS: $RUNNER_OS"
+           echo "Runner Name: $RUNNER_NAME"
+           echo "Repository: $GITHUB_REPOSITORY"
+     - name: Run Shell Commands
+       run: |
+          uname -a
+          pwd
+          ls -ltra
+ 
+          

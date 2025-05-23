@@ -1,0 +1,36 @@
+name: Build and Push Docker Image with Kaniko
+
+inputs:
+  dockerfile:
+    required: true
+  context:
+    required: true
+  registry:
+    required: true
+  image:
+    required: true
+  tag:
+    required: true
+  push:
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build and Push Image
+      shell: bash
+      run: |
+        if [ "${{ inputs.push }}" == "true" ]; then
+          /kaniko/executor \
+            --dockerfile=${{ inputs.dockerfile }} \
+            --context=${{ inputs.context }} \
+            --destination=${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }} \
+            --skip-tls-verify
+        else
+          /kaniko/executor \
+            --dockerfile=${{ inputs.dockerfile }} \
+            --context=${{ inputs.context }} \
+            --destination==${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }} \
+            --no-push
+        fi

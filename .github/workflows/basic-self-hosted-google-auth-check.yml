@@ -1,0 +1,37 @@
+name: Self Hosted Runner Check for GCP Auth WIF
+
+on:
+ workflow_dispatch:
+ push:
+  branches:
+  - main
+
+jobs:
+ gcp-wif-job:
+    runs-on: nonprod-linux-x64-medium
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      ACTIONS_STEP_DEBUG: true
+    steps:
+     - name: Checkout Code
+       uses: actions/checkout@v4
+     - name: GCP Auth
+       uses: google-github-actions/auth@v2
+       with:
+         project_id: "core-n-prj"
+         workload_identity_provider: "projects/xxxxxxx/locations/global/workloadIdentityPools/core-n-gh-gke-runner-pool/providers/gh-gke-runner-pool-oidc-provider"
+     - name: Setup GCloud CLI
+       uses: google-github-actions/setup-gcloud@v1
+       with:
+         version: 'latest'
+     - name: Verify Identity
+       run: |
+           echo "Authenticated Account:"
+           gcloud auth list
+           gcloud config get-value account
+
+
+ 
+          
