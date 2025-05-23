@@ -20,6 +20,31 @@ on:
         description: "Name of the Docker image to build and push"
         required: true
         type: string
+      dockerfile:
+        description: "Path to the Dockerfile"
+        required: true
+        type: string
+      context:
+        description: "Build context directory"
+        required: true
+        type: string
+      registry:
+        description: "Docker registry URL"
+        required: true
+        type: string
+      image:
+        description: "Docker image name"
+        required: true
+        type: string
+      tag:
+        description: "Docker image tag"
+        required: true
+        type: string
+      push:
+        description: "Whether to push the image"
+        required: false
+        type: string
+        default: "false"
 
 jobs:
   kaniko-job:
@@ -40,16 +65,12 @@ jobs:
           workingDirectory: ${{ inputs.workingDirectory }}
           environment: ${{ inputs.environment }}
 
-      - name: Kaniko Build
-        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/build@main
+      - name: Kaniko Build and Push
+        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko@main
         with:
-          workingDirectory: ${{ inputs.workingDirectory }}
-          environment: ${{ inputs.environment }}
-          imageName: ${{ inputs.imageName }}
-
-      - name: Kaniko Push
-        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/push@main
-        with:
-          workingDirectory: ${{ inputs.workingDirectory }}
-          environment: ${{ inputs.environment }}
-          imageName: ${{ inputs.imageName }}
+          dockerfile: ${{ inputs.dockerfile }}
+          context: ${{ inputs.context }}
+          registry: ${{ inputs.registry }}
+          image: ${{ inputs.image }}
+          tag: ${{ inputs.tag }}
+          push: ${{ inputs.push }}
