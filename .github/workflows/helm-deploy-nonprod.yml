@@ -12,6 +12,11 @@ on:
         description: "GCP Project ID"
         required: false
         type: string
+      region:
+        description: "GCP Region"
+        required: false
+        type: string
+        default: us-east4
       workload_identity_provider:
         description: "GCP Workload Identity Provider"
         required: false
@@ -55,13 +60,13 @@ jobs:
       - name: GCP Auth
         uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/gcp/auth@main
         with:
-          project_id:  ${{ inputs.gcp_project_id | secrets.GCP_NONPROD_PROJECT_ID }}
-          workload_identity_provider: ${{ inputs.workload_identity_provider | secrets.GCP_NONPROD_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id:  ${{ inputs.gcp_project_id || secrets.GCP_NONPROD_PROJECT_ID }}
+          workload_identity_provider: ${{ inputs.workload_identity_provider || secrets.GCP_NONPROD_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: Get GKE Credentials
         shell: bash
         run: |
-          gcloud container clusters get-credentials ${{ inputs.cluster }} --zone us-central1-a --project ${{ inputs.gcp_project_id | secrets.GCP_NONPROD_PROJECT_ID }}
+          gcloud container clusters get-credentials ${{ inputs.cluster }} --region ${{ inputs.region }} --project ${{ inputs.gcp_project_id || secrets.GCP_NONPROD_PROJECT_ID }}
 
       - name: Deploy Helm Chart
         uses: girishcodealchemy/gh-actions-alchemy/.github/actions/k8s/helm@main
