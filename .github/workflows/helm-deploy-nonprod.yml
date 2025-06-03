@@ -1,0 +1,73 @@
+name: Reusable Helm Deploy
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: "Name of the GH runner"
+        required: false
+        type: string
+        default: "nonprod-linux-x64-medium"
+      project_id:
+        description: "GCP Project ID"
+        required: false
+        type: string
+      workload_identity_provider:
+        description: "GCP Workload Identity Provider"
+        required: false
+        type: string
+      cluster:
+        description: 'GKE Cluster name'
+        required: true
+        type: string
+      release:
+        description: "Helm release name"
+        required: true
+        type: string
+      chart:
+        description: "Path or name of the Helm chart"
+        required: true
+        type: string
+      namespace:
+        description: "Kubernetes namespace"
+        required: true
+        type: string
+      values:
+        description: "Additional values file or values (optional)"
+        required: false
+        type: string
+      version:
+        description: "Helm chart version (optional)"
+        required: false
+        type: string
+
+
+jobs:
+  helm-deploy:
+    runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: GCP Auth
+        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/gcp/auth@main
+        with:
+          project_id:  ${{ inputs.gcp_project_id | secrets.GCP_NONPROD_PROJECT_ID }}
+          workload_identity_provider: ${{ inputs.workload_identity_provider | secrets.GCP_NONPROD_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: Get GKE Credentials
+        shell: bash
+        run: |
+          gcloud container clusters get-credentials ${{ inputs.cluster }} --zone us-central1-a --project ${{ inputs.gcp_project_id | secrets.GCP_NONPROD_PROJECT_ID }}
+
+      - name: Deploy Helm Chart
+        uses: girishcodealchemy/gh-actions-alchemy/.github/actions/k8s/helm@main
+        with:
+          release: ${{ inputs.release }}
+          chart: ${{ inputs.chart }}
+          namespace: ${{ inputs.namespace }}
+          values: ${{ inputs.values }}
+          version: ${{ inputs.version }}

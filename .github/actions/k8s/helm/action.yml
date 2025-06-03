@@ -1,0 +1,32 @@
+name: Deploy Helm Chart
+
+description: Deploy a Helm chart to a Kubernetes cluster
+
+inputs:
+  release:
+    description: 'Helm release name'
+    required: true
+  chart:
+    description: 'Path or name of the Helm chart'
+    required: true
+  namespace:
+    description: 'Kubernetes namespace'
+    required: true
+  values:
+    description: 'Additional values file or values (optional)'
+    required: false
+  version:
+    description: 'Helm chart version (optional)'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Helm Upgrade/Install
+      shell: bash
+      run: |
+        helm upgrade --install ${{ inputs.release }} ${{ inputs.chart }} \
+          --namespace ${{ inputs.namespace }} \
+          ${{ inputs.values && format('--values {0}', inputs.values) || '' }} \
+          ${{ inputs.version && format('--version {0}', inputs.version) || '' }}
