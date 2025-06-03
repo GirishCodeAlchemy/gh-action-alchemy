@@ -49,21 +49,33 @@ on:
 jobs:
   kaniko-job:
     runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Kaniko Init
-        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/init@main
+      - name: GCP Auth
+        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/gcp/auth@main
         with:
-          workingDirectory: ${{ inputs.workingDirectory }}
-          environment: ${{ inputs.environment }}
+          project_id:  ${{ secrets.GCP_NONPROD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_NONPROD_WORKLOAD_IDENTITY_PROVIDER }}
+      - name: Configure Auth to use GAR
+        run: |
+            gcloud auth configure-docker ${{ inputs.registry }} --quiet
 
-      - name: Kaniko Lint Dockerfile
-        uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/lint@main
-        with:
-          workingDirectory: ${{ inputs.workingDirectory }}
-          environment: ${{ inputs.environment }}
+      # - name: Kaniko Init
+      #   uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/init@main
+      #   with:
+      #     workingDirectory: ${{ inputs.workingDirectory }}
+      #     environment: ${{ inputs.environment }}
+
+      # - name: Kaniko Lint Dockerfile
+      #   uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko/lint@main
+      #   with:
+      #     workingDirectory: ${{ inputs.workingDirectory }}
+      #     environment: ${{ inputs.environment }}
 
       - name: Kaniko Build and Push
         uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/kaniko@main
