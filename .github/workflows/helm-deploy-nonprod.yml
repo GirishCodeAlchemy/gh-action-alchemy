@@ -45,6 +45,10 @@ on:
         description: "Helm chart version (optional)"
         required: false
         type: string
+      helm_opts:
+        description: "Extra options to pass to the helm command (optional)"
+        required: false
+        type: string
 
 
 jobs:
@@ -76,3 +80,4 @@ jobs:
           namespace: ${{ inputs.namespace }}
           values: ${{ inputs.values }}
           version: ${{ inputs.version }}
+          helm_opts: ${{ inputs.helm_opts }}

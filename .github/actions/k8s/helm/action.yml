@@ -18,6 +18,9 @@ inputs:
   version:
     description: 'Helm chart version (optional)'
     required: false
+  helm_opts:
+    description: 'Extra options to pass to the helm command (optional)'
+    required: false
 
 runs:
   using: "composite"
@@ -29,4 +32,5 @@ runs:
         helm upgrade --install ${{ inputs.release }} ${{ inputs.chart }} \
           --namespace ${{ inputs.namespace }} \
           ${{ inputs.values && format('--values {0}', inputs.values) || '' }} \
-          ${{ inputs.version && format('--version {0}', inputs.version) || '' }}
+          ${{ inputs.version && format('--version {0}', inputs.version) || '' }} \
+          ${{ inputs.helm_opts || '' }}
