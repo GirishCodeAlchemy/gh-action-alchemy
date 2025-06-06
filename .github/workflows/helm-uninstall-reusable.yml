@@ -1,4 +1,4 @@
-name: Reusable Helm Deploy
+name: helm-uninstall-reusable
 
 on:
   workflow_call:
@@ -17,10 +17,6 @@ on:
         required: false
         type: string
         default: us-east4
-      workload_identity_provider:
-        description: "GCP Workload Identity Provider"
-        required: false
-        type: string
       cluster:
         description: 'GKE Cluster name'
         required: true
@@ -29,30 +25,17 @@ on:
         description: "Helm release name"
         required: true
         type: string
-      chart:
-        description: "Path or name of the Helm chart"
-        required: true
-        type: string
       namespace:
         description: "Kubernetes namespace"
         required: true
-        type: string
-      values:
-        description: "Additional values file or values (optional)"
-        required: false
-        type: string
-      version:
-        description: "Helm chart version (optional)"
-        required: false
         type: string
       helm_opts:
         description: "Extra options to pass to the helm command (optional)"
         required: false
         type: string
 
-
 jobs:
-  helm-deploy:
+  uninstall:
     runs-on: ${{ inputs.runner }}
     permissions:
       contents: 'read'
@@ -72,12 +55,9 @@ jobs:
         run: |
           gcloud container clusters get-credentials ${{ inputs.cluster }} --region ${{ inputs.region }} --project ${{ inputs.gcp_project_id || secrets.GCP_NONPROD_PROJECT_ID }}
 
-      - name: Deploy Helm Chart
-        uses: girishcodealchemy/gh-actions-alchemy/.github/actions/k8s/helm/deploy@main
+      - name: Uninstall Helm Release
+        uses: girishcodealchemy/gh-actions-alchemy/.github/actions/k8s/helm/uninstall@main
         with:
           release: ${{ inputs.release }}
-          chart: ${{ inputs.chart }}
           namespace: ${{ inputs.namespace }}
-          values: ${{ inputs.values }}
-          version: ${{ inputs.version }}
           helm_opts: ${{ inputs.helm_opts }}
