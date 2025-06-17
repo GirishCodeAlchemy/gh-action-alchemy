@@ -1,0 +1,58 @@
+name: GitHub Migration Workflow
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: "Name of the GH runner"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      workingDirectory:
+        description: "Path to the working directory"
+        required: true
+        type: string
+
+jobs:
+  migrate-repo:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run migrate_repo.py
+        run: |
+          python ${{ inputs.workingDirectory }}/migrate_repo.py
+
+      - name: Upload migration_ids.json artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration_ids
+          path: ${{ inputs.workingDirectory }}/output/migration_ids.json
+
+  check-migration-status:
+    needs: migrate-repo
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download migration_ids.json artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: migration_ids
+          path: ${{ inputs.workingDirectory }}/output
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run check_migrate_status.py
+        run: |
+          python ${{ inputs.workingDirectory }}/check_migrate_status.py
