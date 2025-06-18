@@ -1,0 +1,41 @@
+name: Self Hosted Runner Check for GCP Auth WIF WITH GCS BUCKET
+
+
+on:
+ workflow_dispatch:
+ pull_request:
+  branches:
+  - main
+
+jobs:
+ gcp-wif-job:
+    runs-on: nonprod-linux-x64-medium
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      ACTIONS_STEP_DEBUG: true
+    steps:
+     - name: Checkout Code
+       uses: actions/checkout@v4
+     - name: GCP Auth
+       uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/gcp/auth@main
+       with:
+         project_id:  ${{ secrets.GCP_NONPROD_PROJECT_ID }}
+         workload_identity_provider: ${{ secrets.GCP_NONPROD_WORKLOAD_IDENTITY_PROVIDER }}
+     - name: Setup GCloud CLI
+       uses: google-github-actions/setup-gcloud@v1
+       with:
+         version: 'latest'
+     - name: Verify Identity
+       run: |
+           echo "Authenticated Account:"
+           gcloud auth list
+           gcloud config get-value account
+     - name: Upload File to GCS
+       run: |
+          echo "Hello Test" > test.txt
+          gsutil cp test.txt gs://sample-bucket/test/
+
+ 
+          

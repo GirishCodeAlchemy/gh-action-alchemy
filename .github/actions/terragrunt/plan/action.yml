@@ -27,4 +27,4 @@ runs:
         PARALLELISM: ${{ inputs.parallelism }}
       run: |
         cd "${{ inputs.workingDirectory }}"
-        terragrunt plan --terragrunt-source-update -out=tfplan.out -- -parallelism=${{ inputs.parallelism }}
+         terragrunt plan --terragrunt-source-update -out=${{ github.workspace }}/${{ inputs.workingDirectory }}/tfplan.out -- -parallelism=${{ inputs.parallelism }}

@@ -10,6 +10,9 @@ on:
 jobs:
  self-hosted-runner:
     runs-on: nonprod-linux-x64-medium
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
      - name: Checkout Code
        uses: actions/checkout@v4

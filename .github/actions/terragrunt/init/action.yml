@@ -18,6 +18,8 @@ runs:
   steps:
     - name: Terragrunt Init
       shell: bash
+      env:
+        TF_LOG: ${{ inputs.tfLog }}
       run: |
         cd "${{ inputs.workingDirectory }}"
         terragrunt run-all init --terragrunt-non-interactive

@@ -16,6 +16,9 @@ on:
 jobs:
   migrate-repo:
     runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

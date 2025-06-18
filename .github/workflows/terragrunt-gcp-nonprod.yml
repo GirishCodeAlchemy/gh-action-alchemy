@@ -17,10 +17,20 @@ on:
       description: "Name of the environment"
       required: true
       type: string
+    tfLog:
+      description: Terraform log level
+      required: false
+      type: string
+      default: 'ERROR'
 
 jobs:
- terragrunt-job:
+  terragrunt-job:
     runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      TERRAGRUNT_GITHUB_ORG_TOKEN: ${{ secrets.TERRAGRUNT_GITHUB_ORG_TOKEN }}
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -28,30 +38,68 @@ jobs:
     - name: Terragrunt Init
       uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/terragrunt/init@main
       with:
-        workingDirectory: terragrunt-noop-module
-        environment: nonprod
+        workingDirectory: ${{ inputs.workingDirectory }}
+        environment: ${{ inputs.environment }}
+        tfLog: ${{ inputs.tfLog }}
 
 
     - name: Terragrunt Validate
       uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/terragrunt/validate@main
       with:
-        workingDirectory: terragrunt-noop-module
-        environment: nonprod
+        workingDirectory: ${{ inputs.workingDirectory }}
+        environment: ${{ inputs.environment }}
+        tfLog: ${{ inputs.tfLog }}
 
     - name: Terragrunt Lint
       uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/terragrunt/lint@main
       with:
-        workingDirectory: terragrunt-noop-module
-        environment: nonprod
+        workingDirectory: ${{ inputs.workingDirectory }}
+        environment: ${{ inputs.environment }}
+        tfLog: ${{ inputs.tfLog }}
 
     - name: Terragrunt Plan
       uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/terragrunt/plan@main
       with:
-        workingDirectory: terragrunt-noop-module
-        environment: nonprod
+        workingDirectory: ${{ inputs.workingDirectory }}
+        environment: ${{ inputs.environment }}
+        tfLog: ${{ inputs.tfLog }}
+
+    - name: Upload TF Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: tf-plan
+        path: ${{ github.workspace }}/${{ inputs.workingDirectory }}/tfplan.out
+        retention-days: 30
+
+  terragrunt-apply:
+    needs: terragrunt-plan
+    environment: nonprod
+    runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      TERRAGRUNT_GITHUB_ORG_TOKEN: ${{ secrets.TERRAGRUNT_GITHUB_ORG_TOKEN }}
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: GCP Auth
+      uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/gcp/auth@main
+      with:
+        project_id:  ${{ secrets.GCP_NONPROD_PROJECT_ID }}
+        workload_identity_provider: ${{ secrets.GCP_NONPROD_WORKLOAD_IDENTITY_PROVIDER }}
+      
+    - name: Download TF Plan
+      uses: actions/download-artifact@v4
+      with:
+        name: tf-plan
+        path:  ${{ inputs.workingDirectory }}
 
     - name: Terragrunt Apply
+      if: github.ref == 'refs/heads/main'
       uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/terragrunt/apply@main
       with:
-        workingDirectory: terragrunt-noop-module
-        environment: nonprod
+        workingDirectory: ${{ inputs.workingDirectory }}
+        environment: ${{ inputs.environment }}
+        tfLog: ${{ inputs.tfLog }}

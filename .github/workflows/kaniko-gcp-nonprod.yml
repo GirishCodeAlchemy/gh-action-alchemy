@@ -45,6 +45,11 @@ on:
         required: false
         type: string
         default: "false"
+      verbose:
+        description: "Specify the log level"
+        required: false
+        type: string
+        default: "info"
 
 jobs:
   kaniko-job:
@@ -86,3 +91,4 @@ jobs:
           image: ${{ inputs.image }}
           tag: ${{ inputs.tag }}
           push: ${{ inputs.push }}
+          verbose: ${{ inputs.verbose }}

@@ -14,6 +14,9 @@ inputs:
   push:
     required: false
     default: "false"
+  verbose:
+    required: false
+    default: "info"
 
 runs:
   using: "composite"
@@ -26,11 +29,13 @@ runs:
             --dockerfile=${{ inputs.dockerfile }} \
             --context=${{ inputs.context }} \
             --destination=${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }} \
-            --skip-tls-verify
+            --skip-tls-verify --verbosity=${{ inputs.verbose }} --snapshot-mode=redo --single-snapshot --ignore-path=/ --ignore-path=/home/runner --cleanup=false
         else
           /kaniko/executor \
             --dockerfile=${{ inputs.dockerfile }} \
             --context=${{ inputs.context }} \
             --destination==${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }} \
-            --no-push
+            --no-push --verbosity=${{ inputs.verbose }} --single-snapshot --ignore-path=/ --ignore-path=/home/runner --cleanup=false
         fi
+        echo " Image is successfully pushed to the artifactory"
+        exit 0

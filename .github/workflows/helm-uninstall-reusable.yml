@@ -47,7 +47,7 @@ jobs:
       - name: GCP Auth
         uses: girishcodealchemy/gh-actions-alchemy-library/.github/actions/gcp/auth@main
         with:
-          project_id:  ${{ inputs.gcp_project_id || secrets.GCP_NONPROD_PROJECT_ID }}
+          project_id:  ${{ inputs.project_id || secrets.GCP_NONPROD_PROJECT_ID }}
           workload_identity_provider: ${{ inputs.workload_identity_provider || secrets.GCP_NONPROD_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: Get GKE Credentials
